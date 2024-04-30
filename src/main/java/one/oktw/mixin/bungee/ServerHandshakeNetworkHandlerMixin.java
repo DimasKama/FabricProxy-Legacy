@@ -3,11 +3,10 @@ package one.oktw.mixin.bungee;
 import com.google.gson.Gson;
 import com.mojang.authlib.properties.Property;
 import net.minecraft.network.ClientConnection;
-import net.minecraft.network.NetworkState;
+import net.minecraft.network.packet.c2s.handshake.ConnectionIntent;
 import net.minecraft.network.packet.c2s.handshake.HandshakeC2SPacket;
 import net.minecraft.network.packet.s2c.login.LoginDisconnectS2CPacket;
 import net.minecraft.server.network.ServerHandshakeNetworkHandler;
-import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import one.oktw.Util;
 import one.oktw.interfaces.BungeeClientConnection;
@@ -34,9 +33,9 @@ public class ServerHandshakeNetworkHandlerMixin {
 
 
     @Inject(method = "onHandshake", at = @At(value = "INVOKE", target =
-            "Lnet/minecraft/server/network/ServerLoginNetworkHandler;<init>(Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/network/ClientConnection;)V"))
+            "Lnet/minecraft/server/network/ServerHandshakeNetworkHandler;onHandshake(Lnet/minecraft/network/packet/c2s/handshake/HandshakeC2SPacket;)V"))
     private void onProcessHandshakeStart(HandshakeC2SPacket packet, CallbackInfo ci) {
-        if (NetworkState.LOGIN.equals(packet.getNewNetworkState())) {
+        if (ConnectionIntent.LOGIN.equals(packet.intendedState())) {
             String[] split = packet.address().split("\00");
             if (split.length == 3 || split.length == 4) {
                 // override/insert forwarded IP into connection:
